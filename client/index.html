@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html class="no-js">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <script type="text/javascript" src="main.js"></script>
+  <script type="text/javascript" src="libopenmpt.js"></script>
+  <script type="text/javascript" src="chiptune2.js"></script>
+</head>
+
+<body>
+  <div id="content" class="row">
+    <div class="column">
+      <div>Songs:</div>
+      <div id="songlist" class="song-list">
+        <div><a class="song" data-modurl="DefeatTheBeat.mod" href="#">DefeatTheBeat.mod</a></div>
+        <div><a class="song" data-modurl="https://api.modarchive.org/downloads.php?moduleid=182057#h0ffman_-_drop_the_panic.mod" href="#">Hoffman - Drop The Panic</a></div>
+        <div><a class="song" data-modurl="https://api.modarchive.org/downloads.php?moduleid=41648#dune_ecolove.mod" href="#">Dune - Ecolove</a></div>
+        <div><a class="song" data-modurl="https://api.modarchive.org/downloads.php?moduleid=188784#giana_sisters_level.it" href="#">Giana Sisters - Level</a></div>
+        <div><a class="song" data-modurl="https://api.modarchive.org/downloads.php?moduleid=139528#cydonian_sky_rmx.xm" href="#">Cydonian Sky by Dubmood</a></div>
+      </div>
+    </div>
+    <div class="column">
+      <div id="metadata" class="banner">
+        <span id="title">nothing loaded</span>
+        <span id="artist"></span>
+      </div>
+      <div id="controls" class="banner">
+        <input id="seekbar" type="range" min="0" max="138.23999999999637" value="0"><span id="duration"></span>
+        <br>
+        <a id="play" class="control"></a>
+        <br>
+      </div>
+      <details>
+        <summary>Additional Options</summary>
+        <div class="accordion-content">
+          <p>
+            <div id="choosefile" class="banner">
+              <input type="file" id="files" name="files" />
+            </div>
+            <div id="chooseurl" class="banner">
+              <div>
+                <label>External URL
+                  <input type="text" id="exturl" name="exturl">
+                  <input type="button" value="Submit" id="submiturl" name="submiturl">
+                </label>
+              </div>
+            </div>
+          </p>
+        </div>
+      </details>
+    </div>
+  </div>
+</body>
+</html>
