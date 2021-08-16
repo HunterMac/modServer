@@ -99,7 +99,7 @@ ChiptuneJsPlayer.prototype.unlock = function() {
   this.touchLocked = false;
 }
 
-ChiptuneJsPlayer.prototype.load = function(input, callback) {
+ChiptuneJsPlayer.prototype.load = function(input, callback, headers) {
 
   if (this.touchLocked) {
     this.unlock();
@@ -116,6 +116,9 @@ ChiptuneJsPlayer.prototype.load = function(input, callback) {
   } else {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', input, true);
+    if(typeof headers === 'object') {
+      headers.forEach((header) => xhr.setRequestHeader(header.key, header.value));
+    }
     xhr.responseType = 'arraybuffer';
     xhr.onload = function(e) {
       if (xhr.status === 200) {
@@ -130,6 +133,7 @@ ChiptuneJsPlayer.prototype.load = function(input, callback) {
     xhr.onabort = function() {
       player.fireEvent('onError', {type: 'onxhr'});
     };
+
     xhr.send();
   }
 }
@@ -166,11 +170,17 @@ ChiptuneJsPlayer.prototype.togglePause = function() {
 
 //-----Added
 ChiptuneJsPlayer.prototype.seek = function(position) {
-  libopenmpt._openmpt_module_set_position_seconds(this.currentPlayingNode.modulePtr, position);
+  if(this.currentPlayingNode) {
+    libopenmpt._openmpt_module_set_position_seconds(this.currentPlayingNode.modulePtr, position);
+  }
 }
 
 ChiptuneJsPlayer.prototype.getPosition = function() {
-  return libopenmpt._openmpt_module_get_position_seconds(this.currentPlayingNode.modulePtr);
+  if(this.currentPlayingNode) {
+    return libopenmpt._openmpt_module_get_position_seconds(this.currentPlayingNode.modulePtr);
+  } else {
+    return 0;
+  }
 }
 
 ///---

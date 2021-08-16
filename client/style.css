@@ -14,6 +14,7 @@ body {
   .column {
     flex: 50%;
     margin: 1vh;
+    margin-left: 2vh;
   }
 
   a {
@@ -25,7 +26,7 @@ body {
     color: #eaeaea;
   }
 
- a.song a.dir {
+  a.song a.dir {
     display: inline-block;
   }
 
@@ -50,6 +51,16 @@ body {
     font-size: 2vh;
     height: 92vh;
     overflow: auto;
+  }
+
+  #breadcrumbs > a {
+    font-size: 2.6vh;
+    text-decoration: none;
+  }
+
+  #breadcrumbs span {
+    position: relative;
+    bottom: -2px;
   }
 
   .control#play {

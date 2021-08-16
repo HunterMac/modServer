@@ -38,6 +38,11 @@ libopenmpt.onRuntimeInitialized = function () {
       path = encodeURI(`/${path}`);
     }
     url = `/modlist${path}`;
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    if (code) {
+      url += `?code=${code}`;
+    }
     let response = await fetch(url);
     let songs = '';
     if (response.ok) {
@@ -52,6 +57,7 @@ libopenmpt.onRuntimeInitialized = function () {
         isDirB = b.isDir ? 1 : 0;
         return isDirB - isDirA;
       });
+      updatePlaylistItems(jsonResponse);
       jsonResponse.forEach((item) => {
         let relativePath = item.relativePath.replace(/#/g, '%23');
         if (item.isDir) {
@@ -68,7 +74,19 @@ libopenmpt.onRuntimeInitialized = function () {
     } else {
       console.error("HTTP-Error: " + response.status);
     }
+  }
 
+  function updatePlaylistItems(jsonItems) {
+    let songs = '';
+    jsonItems.forEach((item) => {
+      let relativePath = item.relativePath.replace(/#/g, '%23');
+      if (item.isDir) {
+        songs += `<div><a class="dir" data-dirurl="${relativePath}" href="#">${item.name}</a></div>`;
+      } else {
+        songs += `<div><a class="song" data-modurl="${relativePath}" href="#">${item.name}</a></div>`;
+      }
+    });
+    document.getElementById('songlist').innerHTML = songs;
   }
 
   function setMetadata(filename) {
@@ -102,9 +120,9 @@ libopenmpt.onRuntimeInitialized = function () {
     initSeekbar();
   }
 
-  function loadURL(path) {
+  function loadURL(path, headers) {
     init();
-    player.load(path, afterLoad.bind(this, path));
+    player.load(path, afterLoad.bind(this, path), headers);
   }
 
   function pauseButton() {
@@ -160,7 +178,7 @@ libopenmpt.onRuntimeInitialized = function () {
     document.getElementById('seekbar').max = sec_num;
   }
 
-  updatePlaylist('');
+  //updatePlaylist('');
 
   var fileaccess = document.querySelector('*');
   fileaccess.ondrop = function (e) {
@@ -195,8 +213,57 @@ libopenmpt.onRuntimeInitialized = function () {
   document.querySelector('#play').addEventListener('click', pauseButton, false);
   var seekBar = document.querySelector('#seekbar');
   seekBar.addEventListener('change', seek, false);
-  seekBar.addEventListener("mousedown", () => {seekBarAvalailable = false;
-    console.log('seekbar - mouse down!')});
-  seekBar.addEventListener("mouseup", () => {seekBarAvalailable = true;
-  console.log('seekbar - mouse up!')});
+  seekBar.addEventListener("mousedown", () => seekBarAvalailable = false);
+  seekBar.addEventListener("mouseup", () => seekBarAvalailable = true);
+
+  window.loadURL = loadURL;
 };
+
+// ui = {
+//   breadCrumbItems: [{
+//     name: '🖿', 
+//     link: 'root'
+//   }],
+
+//   updateBreadcrumbs: () => {
+//     links = '';
+//     for(i=0; i< ui.breadCrumbItems.length ; i++) {
+//       item = ui.breadCrumbItems[i];
+//       links += `<a class="breadcrumb-link" data-url="${item.link}" data-index="${i}" href="#">${item.name} </a><span>> </span>`;
+//     }
+//     document.getElementById('breadcrumbs').innerHTML = links;
+//   },
+
+//   selectBreadcrumb: (index) => {
+//     ui.breadCrumbItems = ui.breadCrumbItems.slice(0, index + 1);
+//     ui.updateBreadcrumbs();
+//   }
+// };
+
+class UserInterface {
+  breadCrumbItems= [{
+    name: '🖿', 
+    link: 'root'
+  }];
+
+  updateBreadcrumbs() {
+    let links = '';
+    for(let i=0; i< this.breadCrumbItems.length ; i++) {
+      let item = this.breadCrumbItems[i];
+      links += `<a class="breadcrumb-link" data-url="${item.link}" data-index="${i}" href="#">${item.name} </a><span>> </span>`;
+    }
+    document.getElementById('breadcrumbs').innerHTML = links;
+  }
+
+  selectBreadcrumb(index) {
+    this.breadCrumbItems = this.breadCrumbItems.slice(0, index + 1);
+    this.updateBreadcrumbs();
+  }
+};
+
+window.addEventListener('DOMContentLoaded', (event) => {
+  window.ui = new UserInterface();
+  ui.updateBreadcrumbs();
+});
+
+

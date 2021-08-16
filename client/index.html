@@ -21,13 +21,13 @@
 <body>
   <div id="content" class="row">
     <div class="column">
-      <div>Songs:</div>
+      <div id="breadcrumbs"></div>
       <div id="songlist" class="song-list">
-        <div><a class="song" data-modurl="DefeatTheBeat.mod" href="#">DefeatTheBeat.mod</a></div>
+        <!--<div><a class="song" data-modurl="DefeatTheBeat.mod" href="#">DefeatTheBeat.mod</a></div>
         <div><a class="song" data-modurl="https://api.modarchive.org/downloads.php?moduleid=182057#h0ffman_-_drop_the_panic.mod" href="#">Hoffman - Drop The Panic</a></div>
         <div><a class="song" data-modurl="https://api.modarchive.org/downloads.php?moduleid=41648#dune_ecolove.mod" href="#">Dune - Ecolove</a></div>
         <div><a class="song" data-modurl="https://api.modarchive.org/downloads.php?moduleid=188784#giana_sisters_level.it" href="#">Giana Sisters - Level</a></div>
-        <div><a class="song" data-modurl="https://api.modarchive.org/downloads.php?moduleid=139528#cydonian_sky_rmx.xm" href="#">Cydonian Sky by Dubmood</a></div>
+        <div><a class="song" data-modurl="https://api.modarchive.org/downloads.php?moduleid=139528#cydonian_sky_rmx.xm" href="#">Cydonian Sky by Dubmood</a></div>-->
       </div>
     </div>
     <div class="column">
@@ -41,6 +41,8 @@
         <a id="play" class="control"></a>
         <br>
       </div>
+      <button id="authorize_button" style="display: none;">Authorize</button>
+      <button id="signout_button" style="display: none;">Sign Out</button>
       <details>
         <summary>Additional Options</summary>
         <div class="accordion-content">
@@ -61,5 +63,8 @@
       </details>
     </div>
   </div>
+  <script async defer type="text/javascript" src="gapi.js"></script>
+  <script async defer src="https://apis.google.com/js/api.js"
+  onload="this.onload=function(){};handleClientLoad()"></script>
 </body>
 </html>
