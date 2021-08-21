@@ -4,18 +4,17 @@ libopenmpt.locateFile = function (filename) {
   return filename;
 };
 libopenmpt.onRuntimeInitialized = function () {
-  var player;
-  var seekBarAvalailable = true;
 
   function init() {
-    if (player == undefined) {
-      player = new ChiptuneJsPlayer(new ChiptuneJsConfig(-1));
+    if (window.player == undefined) {
+      window.player = new ChiptuneJsPlayer(new ChiptuneJsConfig(-1));
+      const event = new CustomEvent('playerInitialized');
+      window.dispatchEvent(event);
     }
     else {
       player.stop();
       playPauseButton();
     }
-    setInterval(updateProgress, 500);
   }
 
   function attachPlayslistEvents() {
@@ -79,6 +78,7 @@ libopenmpt.onRuntimeInitialized = function () {
   function updatePlaylistItems(jsonItems) {
     let songs = '';
     jsonItems.forEach((item) => {
+      // fix for # characters are not encoded in url
       let relativePath = item.relativePath.replace(/#/g, '%23');
       if (item.isDir) {
         songs += `<div><a class="dir" data-dirurl="${relativePath}" href="#">${item.name}</a></div>`;
@@ -104,20 +104,14 @@ libopenmpt.onRuntimeInitialized = function () {
     else {
       document.getElementById('artist').innerHTML = '';
     }
-    updateDuration();
-  }
-
-  function initSeekbar() {
-    const seekbar = document.querySelector('#seekbar');
-    seekbar.setAttribute('max', player.duration());
-    seekbar.value = 0;
   }
 
   function afterLoad(path, buffer) {
     player.play(buffer);
     setMetadata(path);
     pausePauseButton();
-    initSeekbar();
+    const event = new CustomEvent('modLoaded');
+    window.dispatchEvent(event);
   }
 
   function loadURL(path, headers) {
@@ -159,25 +153,7 @@ libopenmpt.onRuntimeInitialized = function () {
     }
   }
 
-  function seek(event) {
-    player.seek(event.target.value);
-  }
-
-  function updateProgress() {
-    if (seekBarAvalailable) {
-      document.getElementById('seekbar').value = player.getPosition();
-    }
-  }
-
-  function updateDuration() {
-    var sec_num = player.duration();
-    var minutes = Math.floor(sec_num / 60);
-    var seconds = Math.floor(sec_num % 60);
-    if (seconds < 10) { seconds = '0' + seconds; }
-    document.getElementById('duration').innerHTML = minutes + ':' + seconds;
-    document.getElementById('seekbar').max = sec_num;
-  }
-
+  //temporarty removing mod server
   //updatePlaylist('');
 
   var fileaccess = document.querySelector('*');
@@ -211,59 +187,89 @@ libopenmpt.onRuntimeInitialized = function () {
   });
 
   document.querySelector('#play').addEventListener('click', pauseButton, false);
-  var seekBar = document.querySelector('#seekbar');
-  seekBar.addEventListener('change', seek, false);
-  seekBar.addEventListener("mousedown", () => seekBarAvalailable = false);
-  seekBar.addEventListener("mouseup", () => seekBarAvalailable = true);
-
   window.loadURL = loadURL;
 };
 
-// ui = {
-//   breadCrumbItems: [{
-//     name: '🖿', 
-//     link: 'root'
-//   }],
 
-//   updateBreadcrumbs: () => {
-//     links = '';
-//     for(i=0; i< ui.breadCrumbItems.length ; i++) {
-//       item = ui.breadCrumbItems[i];
-//       links += `<a class="breadcrumb-link" data-url="${item.link}" data-index="${i}" href="#">${item.name} </a><span>> </span>`;
-//     }
-//     document.getElementById('breadcrumbs').innerHTML = links;
-//   },
+ui = {
+  breadcrumbs: {
+    breadCrumbItems: [{
+      name: '🖿', 
+      link: 'root'
+    }],
+    
+    updateBreadcrumbs() {
+      links = '';
+      for(i=0; i< this.breadCrumbItems.length ; i++) {
+        item = this.breadCrumbItems[i];
+        links += `<a class="breadcrumb-link" data-url="${item.link}" data-index="${i}" href="#">${item.name} </a><span>> </span>`;
+      }
+      document.getElementById('breadcrumbs').innerHTML = links;
+    },
 
-//   selectBreadcrumb: (index) => {
-//     ui.breadCrumbItems = ui.breadCrumbItems.slice(0, index + 1);
-//     ui.updateBreadcrumbs();
-//   }
-// };
-
-class UserInterface {
-  breadCrumbItems= [{
-    name: '🖿', 
-    link: 'root'
-  }];
-
-  updateBreadcrumbs() {
-    let links = '';
-    for(let i=0; i< this.breadCrumbItems.length ; i++) {
-      let item = this.breadCrumbItems[i];
-      links += `<a class="breadcrumb-link" data-url="${item.link}" data-index="${i}" href="#">${item.name} </a><span>> </span>`;
+    selectBreadcrumb(index) {
+      this.breadCrumbItems = this.breadCrumbItems.slice(0, index + 1);
+      this.updateBreadcrumbs();
     }
-    document.getElementById('breadcrumbs').innerHTML = links;
-  }
+  },
+  seekBar: {
+    seekBarAvalailable: true,
 
-  selectBreadcrumb(index) {
-    this.breadCrumbItems = this.breadCrumbItems.slice(0, index + 1);
-    this.updateBreadcrumbs();
-  }
+    seekBar() {
+      return document.querySelector('#seekbar');
+    },
+
+    seek(event) {
+      player.seek(event.target.value);
+    },
+
+    updateProgress() {
+      if (typeof player == 'object' && this.seekBarAvalailable) {
+        this.seekBar().value = player.getPosition();
+      }
+    },
+
+    updateDurationDisplay() {
+      var sec_num = player.duration();
+      var minutes = Math.floor(sec_num / 60);
+      var seconds = Math.floor(sec_num % 60);
+      if (seconds < 10) { seconds = '0' + seconds; }
+      document.getElementById('duration').innerHTML = minutes + ':' + seconds;
+      document.getElementById('seekbar').max = sec_num;
+    },
+
+    setSeekbarDuration() {
+      const seekbar = document.querySelector('#seekbar');
+      seekbar.setAttribute('max', player.duration());
+      seekbar.value = 0;
+    },
+
+    initDuration() {
+      this.setSeekbarDuration();
+      this.updateDurationDisplay();
+    },
+
+    bindSeekBarEvents() {
+      this.seekBar().addEventListener('change', this.seek, false);
+      this.seekBar().addEventListener('mousedown', () => this.seekBarAvalailable = false);
+      this.seekBar().addEventListener('mouseup', () => this.seekBarAvalailable = true);
+      setInterval(this.updateProgress.bind(this), 500);
+      window.addEventListener('modLoaded', this.initDuration.bind(this));
+    }
+  },
+
+  init() {
+    ui.breadcrumbs.updateBreadcrumbs();
+    window.addEventListener('playerInitialized', () => {
+      if (typeof window.player === 'object') {
+        this.seekBar.bindSeekBarEvents();
+      }
+    });
+  },
 };
 
-window.addEventListener('DOMContentLoaded', (event) => {
-  window.ui = new UserInterface();
-  ui.updateBreadcrumbs();
+window.addEventListener('DOMContentLoaded', () => {
+    ui.init();
 });
 
 

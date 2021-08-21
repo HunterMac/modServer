@@ -75,8 +75,8 @@ function attachPlayslistEvents() {
   document.querySelectorAll('.dir').forEach(function (e) {
     e.addEventListener('click', function (evt) {
       id = evt.target.getAttribute("data-dirurl");
-      ui.breadCrumbItems.push({name: evt.target.innerHTML, link: id});
-      ui.updateBreadcrumbs();
+      ui.breadcrumbs.breadCrumbItems.push({name: evt.target.innerHTML, link: id});
+      ui.breadcrumbs.updateBreadcrumbs();
       listFiles(id);
     }, false);
   });
@@ -85,7 +85,7 @@ function attachPlayslistEvents() {
     e.addEventListener('click', function (evt) {
       id = evt.target.getAttribute("data-url");
       index = evt.target.getAttribute("data-index");
-      ui.selectBreadcrumb(parseInt(index));
+      ui.breadcrumbs.selectBreadcrumb(parseInt(index));
       listFiles(id);
     }, false);
   });
