@@ -46,6 +46,7 @@ libopenmpt.onRuntimeInitialized = function () {
     let songs = '';
     if (response.ok) {
       let jsonResponse = await response.json();
+      //To be replaced with breadcrumbs!
       if (path !== '/') {
         songs += '<div><a class="dir dir-top" data-dirurl="" href="#">.</a></div>';
         parentDir = path.substr(0, path.lastIndexOf('/'));
@@ -153,7 +154,7 @@ libopenmpt.onRuntimeInitialized = function () {
     }
   }
 
-  //temporarty removing mod server
+  //temporarty removing mod server support
   //updatePlaylist('');
 
   var fileaccess = document.querySelector('*');
@@ -258,8 +259,39 @@ ui = {
     }
   },
 
+  playlist: {
+    updatePlaylist(evt) {
+      let {items, songClickCallback, dirClickCallback, breadcrumbsClickCallback} = evt.detail;
+      let songs = '';
+      items.forEach((item) => {
+        // fix for # characters are not encoded in url
+        let path = item.path.replace(/#/g, '%23');
+        let type = item.isDir ? 'dir' : 'song';
+        songs += `<div><a class="${type}" data-path="${path}" href="#">${item.name}</a></div>`
+      });
+      document.getElementById('songlist').innerHTML = songs;
+
+      //attach click callbacks
+      document.querySelectorAll('.dir').forEach((e) => {
+        e.addEventListener('click', dirClickCallback, false);
+      });
+      //should it be added on playlist refresh?
+      document.querySelectorAll('.breadcrumb-link').forEach(function (e) {
+        e.addEventListener('click', breadcrumbsClickCallback, false);
+      });    
+      document.querySelectorAll('.song').forEach(function (e) {
+        e.addEventListener('click', songClickCallback, false);
+      });
+    },
+
+    init() {
+      window.addEventListener('updatePlaylist', this.updatePlaylist.bind(this));
+    }
+  },
+
   init() {
-    ui.breadcrumbs.updateBreadcrumbs();
+    this.breadcrumbs.updateBreadcrumbs();
+    this.playlist.init();
     window.addEventListener('playerInitialized', () => {
       if (typeof window.player === 'object') {
         this.seekBar.bindSeekBarEvents();
