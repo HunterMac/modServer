@@ -1,5 +1,10 @@
 # modServer
-music modules player
+Music modules player
+
+Supported formats:
+- mod
+- xm
+- s3m
 
 ## How to run
 
